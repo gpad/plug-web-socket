@@ -31,7 +31,7 @@ defmodule WebSocket.Cowboy.Handler do
   """
   @spec init(atom, :cowboy_req.req, {atom, atom}) :: {:upgrade, :protocol, :cowboy_websocket}
   def init(_transport, _req, {_plug, action}) do
-    {:ok, _pid} = Events.start_link(action)
+    # {:ok, _pid} = Events.start_link(action)
     {:upgrade, :protocol, :cowboy_websocket}
   end
 
@@ -41,7 +41,7 @@ defmodule WebSocket.Cowboy.Handler do
   def websocket_init(transport, req, opts) do
     state = @connection.conn(req, transport)
       |> build_state(opts)
-    Events.subscribe(state.action, self)
+    # Events.subscribe(state.action, self)
     args = get_args(:init, state)
     handle_reply req, args, state
   end
@@ -52,7 +52,7 @@ defmodule WebSocket.Cowboy.Handler do
   """
   @spec websocket_handle(tuple, :cowboy_req.req, State.t) :: reply
   def websocket_handle({:text, msg} = event, req, state) do
-    Events.broadcast(state.action, event, self)
+    # Events.broadcast(state.action, event, self)
     args = get_args(msg, state)
     handle_reply req, args, state
   end
@@ -67,7 +67,7 @@ defmodule WebSocket.Cowboy.Handler do
   """
   @spec websocket_info(tuple, :cowboy_req.req, State.t) :: reply
   def websocket_info({:timeout, _ref, msg} = event, req, state) do
-    Events.broadcast(state.action, event, self)
+    # Events.broadcast(state.action, event, self)
     args = get_args(msg, state)
     handle_reply req, args, state
   end
@@ -77,7 +77,7 @@ defmodule WebSocket.Cowboy.Handler do
     handle_reply req, args, state
   end
 
-  def websocket_info(_info, req, state) do
+  def websocket_info(info, req, state) do
     {:ok, req, state, :hibernate}
   end
 
@@ -87,7 +87,7 @@ defmodule WebSocket.Cowboy.Handler do
   """
   @spec websocket_terminate(atom | tuple, :cowboy_req.req, State.t) :: :ok
   def websocket_terminate(_reason, _req, state) do
-    Events.unsubscribe(state.action, self)
+    # Events.unsubscribe(state.action, self)
     apply(state.plug, state.action, [:terminate, state])
   end
 
@@ -95,7 +95,7 @@ defmodule WebSocket.Cowboy.Handler do
   """
   @spec terminate(atom | tuple, :cowboy_req.req, State.t) :: :ok
   def terminate(_reason, _req, state) do
-    Events.stop(state.action)
+    # Events.stop(state.action)
     :ok
   end
 
